@@ -26,6 +26,8 @@ const isString = (object, config = {}) => {
 
     for (let key in config) {
         switch (key) {
+        case KEYS.REDUCE_SPACES:
+            break;
         case KEYS.MIN_LENGTH:
             if (typeof config[KEYS.MIN_LENGTH] !== TYPES.NUMBER) {
                 throw new TypeError(`isString -> config -> ${key} is not a valid number`);
@@ -285,7 +287,7 @@ const buildRegex = (allowLetters, allowNumbers, specialCharacters = []) => {
     const alreadyAddedChars = [];
     specialCharacters.forEach((specialChar) => {
         if (specialChar.length === 1 && !REGEX.ALPHANUMERIC.test(specialChar) && alreadyAddedChars.indexOf(specialChar) < 0) {
-            if (['.', '*', '\\'].indexOf(specialChar) > -1) {
+            if (['.', '*', '\\', '-'].indexOf(specialChar) > -1) {
                 builtRegex += '\\';
             }
             builtRegex += specialChar;
@@ -393,6 +395,12 @@ const objectHasOnlyKnownProps = (object, properties) => {
     return true;
 };
 
+const bundleWithConfig = (validator, config) => {
+    return (object) => {
+        return validator(object, config);
+    };
+};
+
 let forExport = {
     isString,
     isNumber,
@@ -408,9 +416,10 @@ let forExport = {
     emailValidator,
     arrayValidator,
     customValidator,
+    bundleWithConfig,
 };
 
-if (process.env.NODE_ENV.trim() === 'testing') {
+if (process && process.env && process.env.NODE_ENV && process.env.NODE_ENV.trim() === 'testing') {
     forExport = {
         ...forExport,
         buildRegex,
@@ -419,4 +428,5 @@ if (process.env.NODE_ENV.trim() === 'testing') {
         objectHasOnlyKnownProps,
     };
 }
+
 module.exports = forExport;
